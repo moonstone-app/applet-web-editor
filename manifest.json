@@ -1,0 +1,51 @@
+{
+  "name": "Web Editor",
+  "description": "Full-featured note editor",
+  "icon": "✏️",
+  "version": "1.0.0",
+  "author": "Moonstone",
+  "capabilities": [
+    "pages", "search", "tags", "links", "attachments",
+    "toc", "analytics", "store", "sse"
+  ],
+  "preferences": [
+    {
+      "key": "auto_save",
+      "type": "boolean",
+      "default": true,
+      "label": "Auto-save",
+      "description": "Automatically save after typing stops"
+    },
+    {
+      "key": "auto_save_delay",
+      "type": "number",
+      "default": 800,
+      "label": "Auto-save delay (ms)"
+    },
+    {
+      "key": "editor_mode",
+      "type": "select",
+      "options": ["raw", "preview", "split"],
+      "default": "raw",
+      "label": "Default editor mode"
+    },
+    {
+      "key": "font_size",
+      "type": "number",
+      "default": 15,
+      "label": "Editor font size (px)"
+    },
+    {
+      "key": "inbox_page",
+      "type": "string",
+      "default": "Inbox",
+      "label": "Quick Capture target page"
+    },
+    {
+      "key": "tree_width",
+      "type": "number",
+      "default": 260,
+      "label": "File tree panel width (px)"
+    }
+  ]
+}

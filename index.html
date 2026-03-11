@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Moonstone Editor</title>
+<link rel="stylesheet" href="/static/moonstone.css">
+<link rel="stylesheet" href="editor.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#080c14">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>" type="image/svg+xml">
+<script>(function(){var t=localStorage.getItem('ms-editor-theme');if(t)document.documentElement.setAttribute('data-theme',t);})()</script>
+</head>
+<body>
+
+<!-- Toolbar -->
+<header class="ed-toolbar" id="toolbar">
+  <button class="ed-toolbar-btn ed-hamburger" id="btnMenu" title="Toggle file tree (Ctrl+\\)">&#9776;</button>
+  <div class="ed-toolbar-title">
+    <span class="ms-moon"></span>
+    <span id="pageTitle">Moonstone Editor</span>
+    <span class="ed-save-dot" id="saveDot"></span>
+  </div>
+  <div class="ed-toolbar-spacer"></div>
+  <div class="ed-collab-users" id="collabUsers" style="display:none"></div>
+  <div class="ed-toolbar-group">
+    <button class="ed-toolbar-btn" id="btnSearch" title="Search (Ctrl+K)">&#x1F50D;</button>
+    <button class="ed-toolbar-btn" id="btnCapture" title="Quick Capture (Ctrl+N)">&#xFF0B;</button>
+    <button class="ed-toolbar-btn" id="btnSidebar" title="Toggle sidebar (Ctrl+/)">&#x1F4CB;</button>
+    <button class="ed-toolbar-btn" id="btnTheme" title="Toggle theme">&#x2600;</button>
+  </div>
+</header>
+
+<!-- Main 3-column layout -->
+<div class="ed-main" id="main">
+
+  <!-- Left: File Tree -->
+  <aside class="ed-tree-panel" id="treePanel">
+    <div class="ed-tree-header">
+      <input type="text" class="ms-input ms-input-sm" id="treeFilter" placeholder="Filter pages&#x2026;">
+    </div>
+    <nav class="ed-tree-body" id="treeBody"></nav>
+    <div class="ed-tree-footer">
+      <button class="ms-btn ms-btn-sm ms-btn-ghost ed-w-full" id="btnNewPage">&#xFF0B; New Page</button>
+    </div>
+  </aside>
+
+  <div class="ed-resize-handle" id="treeResizer"></div>
+
+  <!-- Center: Editor -->
+  <main class="ed-editor-panel" id="editorPanel">
+    <!-- Format toolbar -->
+    <div class="ed-format-bar" id="formatBar">
+      <div class="ms-btn-group">
+        <button class="ms-btn ms-btn-sm" data-action="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+        <button class="ms-btn ms-btn-sm" data-action="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+        <button class="ms-btn ms-btn-sm" data-action="strikethrough" title="Strikethrough"><del>S</del></button>
+        <button class="ms-btn ms-btn-sm" data-action="code" title="Code">&lt;&gt;</button>
+      </div>
+      <div class="ed-format-sep"></div>
+      <div class="ms-btn-group">
+        <button class="ms-btn ms-btn-sm" data-action="heading" title="Heading">H</button>
+        <button class="ms-btn ms-btn-sm" data-action="link" title="Link (Ctrl+L)">&#x1F517;</button>
+        <button class="ms-btn ms-btn-sm" data-action="list" title="List">&#x2022;</button>
+        <button class="ms-btn ms-btn-sm" data-action="checkbox" title="Checkbox">&#x2610;</button>
+      </div>
+      <div class="ed-format-sep"></div>
+      <div class="ms-btn-group">
+        <button class="ms-btn ms-btn-sm" data-action="image" title="Image">&#x1F5BC;</button>
+      </div>
+      <div class="ed-toolbar-spacer"></div>
+      <div class="ms-btn-group ed-mode-toggle" id="modeToggle">
+        <button class="ms-btn ms-btn-sm active" data-mode="raw">Raw</button>
+        <button class="ms-btn ms-btn-sm" data-mode="preview">Preview</button>
+        <button class="ms-btn ms-btn-sm ed-desktop-only" data-mode="split">Split</button>
+      </div>
+    </div>
+
+    <!-- Editor area -->
+    <div class="ed-editor-area" id="editorArea">
+      <textarea class="ed-textarea" id="editorTextarea" spellcheck="true" placeholder="Start writing&#x2026;"></textarea>
+      <div class="ed-preview" id="editorPreview" style="display:none"></div>
+    </div>
+
+    <!-- Autocomplete dropdown for wiki-links -->
+    <div class="ed-autocomplete" id="autocomplete" style="display:none"></div>
+
+    <!-- Status bar -->
+    <div class="ed-statusbar" id="statusBar">
+      <span class="ed-status-item" id="statusFormat">wiki</span>
+      <span class="ed-status-sep">&middot;</span>
+      <span class="ed-status-item" id="statusWords">0 words</span>
+      <span class="ed-status-sep">&middot;</span>
+      <span class="ed-status-item" id="statusCursor">Ln 1, Col 1</span>
+      <span class="ed-toolbar-spacer"></span>
+      <span class="ed-status-item" id="statusSave">Ready</span>
+    </div>
+  </main>
+
+  <div class="ed-resize-handle ed-sidebar-resize" id="sidebarResizer"></div>
+
+  <!-- Right: Sidebar -->
+  <aside class="ed-sidebar-panel" id="sidebarPanel">
+    <div class="ed-sidebar-tabs" id="sidebarTabs">
+      <button class="ed-sidebar-tab active" data-tab="backlinks">&#x21A9; Links</button>
+      <button class="ed-sidebar-tab" data-tab="toc">&#x1F4D1; TOC</button>
+      <button class="ed-sidebar-tab" data-tab="info">&#x1F4CA; Info</button>
+      <button class="ed-sidebar-tab" data-tab="tags">&#x1F3F7; Tags</button>
+    </div>
+    <div class="ed-sidebar-body" id="sidebarBody"></div>
+  </aside>
+</div>
+
+<!-- Overlay: backdrop for mobile panels -->
+<div class="ed-backdrop" id="backdrop"></div>
+
+<!-- Overlay: Search / Command Palette -->
+<div class="ms-overlay" id="searchOverlay">
+  <div class="ed-search-dialog">
+    <div style="display:flex; padding: var(--ms-sp-2) var(--ms-sp-4); gap: 8px; border-bottom: 1px solid var(--ms-border);">
+       <input type="text" class="ms-input" id="searchInput" placeholder="Search pages&#x2026; (Ctrl+K)" style="border:none; padding:8px 0; border-radius:0; flex:1;">
+       <button class="ms-btn ms-btn-sm ms-btn-ghost" id="searchToggleReplace" title="Toggle Replace Mode (Ctrl+Shift+F)">Replace</button>
+    </div>
+    <div id="replaceBox" style="display:none; padding: var(--ms-sp-2) var(--ms-sp-4); gap: 8px; border-bottom: 1px solid var(--ms-border); background: var(--ms-bg);">
+       <input type="text" class="ms-input" id="replaceInput" placeholder="Replace with&#x2026;" style="border:none; padding:8px 0; border-radius:0; flex:1;">
+       <button class="ms-btn ms-btn-sm ms-btn-primary" id="btnReplaceAll">Replace All</button>
+    </div>
+    <div class="ed-search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- Overlay: Tag Wrangler -->
+<div class="ms-overlay" id="tagWranglerOverlay">
+  <div class="ms-dialog" style="max-width:600px; max-height:80vh; display:flex; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+       <h3>⚙️ Tag Wrangler</h3>
+       <button class="ms-btn ms-btn-sm ms-btn-ghost" id="tagWranglerClose">✕</button>
+    </div>
+    <p class="ms-dialog-sub">Rename or delete tags across your entire vault.</p>
+    <div style="overflow-y:auto; flex:1; border:1px solid var(--ms-border); border-radius:var(--ms-radius-sm);">
+      <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.85rem;">
+        <thead style="background:var(--ms-bg-raised); border-bottom:1px solid var(--ms-border);">
+          <tr>
+            <th style="padding:8px 12px; color:var(--ms-text-muted);">Tag</th>
+            <th style="padding:8px 12px; color:var(--ms-text-muted); width:80px;">Count</th>
+            <th style="padding:8px 12px; color:var(--ms-text-muted); width:160px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tagWranglerBody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: Quick Capture -->
+<div class="ms-overlay" id="captureOverlay">
+  <div class="ms-dialog ed-capture-dialog">
+    <h3>Quick Capture</h3>
+    <p class="ms-dialog-sub">Write a thought &rarr; saved to Inbox</p>
+    <textarea class="ms-textarea" id="captureText" rows="4" placeholder="What's on your mind?"></textarea>
+    <div class="ms-dialog-actions">
+      <button class="ms-btn ms-btn-ghost" id="captureCancel">Cancel</button>
+      <button class="ms-btn ms-btn-primary" id="captureSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay: New Page -->
+<div class="ms-overlay" id="newPageOverlay">
+  <div class="ms-dialog">
+    <h3>New Page</h3>
+    <p class="ms-dialog-sub">Use : for namespaces (e.g. Projects:Alpha)</p>
+    <input type="text" class="ms-input" id="newPageName" placeholder="Page name">
+    <div class="ms-dialog-actions">
+      <button class="ms-btn ms-btn-ghost" id="newPageCancel">Cancel</button>
+      <button class="ms-btn ms-btn-primary" id="newPageCreate">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Context menu -->
+<div class="ed-context-menu" id="contextMenu" style="display:none">
+  <div class="ed-context-item" data-action="open">&#x1F4C4; Open</div>
+  <div class="ed-context-item" data-action="new-subpage">&#xFF0B; New subpage</div>
+  <div class="ed-context-sep"></div>
+  <div class="ed-context-item" data-action="rename">&#x270F; Rename</div>
+  <div class="ed-context-sep"></div>
+  <div class="ed-context-item ed-danger" data-action="delete">&#x1F5D1; Delete</div>
+</div>
+
+<!-- Toast container -->
+<div class="ms-toast-container" id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="/static/moonstone-bridge.js"></script>
+<script src="js/state.js"></script>
+<script src="js/tree.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/sidebar.js"></script>
+<script src="js/search.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/collab.js"></script>
+<script src="js/graph.js"></script>
+<script src="js/pwa.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
