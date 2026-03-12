@@ -6,6 +6,7 @@
 var FileTree = (function () {
   var ms, body, filterInput, contextMenu;
   var expandedNodes = {};
+  var treeCache = {};
   var contextTarget = null;
   var _loadId = 0;
 
@@ -94,10 +95,11 @@ var FileTree = (function () {
     if (!Array.isArray(nodes)) return;
     nodes.forEach(function (n) {
       var name = n.name || n.path || '';
-      var hasKids = !!(n.haschildren || (n.children && n.children.length > 0));
+      var children = n.children || treeCache[name];
+      var hasKids = !!(n.haschildren || (children && children.length > 0));
       container.appendChild(makeNode(name, depth, hasKids));
-      if (hasKids && expandedNodes[name] && n.children && n.children.length) {
-        renderNodes(n.children, container, depth + 1);
+      if (hasKids && expandedNodes[name] && children && children.length) {
+        renderNodes(children, container, depth + 1);
       }
     });
   }
@@ -136,7 +138,12 @@ var FileTree = (function () {
     } else {
       expandedNodes[name] = true;
       // Lazy load children if needed
-      try { await ms.getPageTree(name, 1); } catch (_) {}
+      if (!treeCache[name]) {
+        try { 
+          var res = await ms.getPageTree(name, 1); 
+          treeCache[name] = res.tree || res.children || [];
+        } catch (_) {}
+      }
     }
     loadTree();
   }
