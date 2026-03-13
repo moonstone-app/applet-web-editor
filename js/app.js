@@ -17,10 +17,10 @@ var App = (function () {
     treePanel = document.getElementById('treePanel');
     sidebarPanel = document.getElementById('sidebarPanel');
 
-    // Hide toolbar in workspace mode
-    if (EditorState.isInWorkspace) {
-      document.getElementById('toolbar').style.display = 'none';
-    }
+    // Removed hiding toolbar in workspace mode so applet's toolbar is always visible
+    // if (EditorState.isInWorkspace) {
+    //   document.getElementById('toolbar').style.display = 'none';
+    // }
 
     // Init modules
     FileTree.init(ms);
